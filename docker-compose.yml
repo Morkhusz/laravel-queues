@@ -1,0 +1,39 @@
+version: "3.3"
+
+services:
+  php:
+    image: uotz/php7.4-nginx
+    container_name: queue-php
+    restart: unless-stopped
+    ports:
+      - "80:8080"
+    volumes:
+      - .:/home/app
+      - ./.docker/nginx/default.conf:/etc/nginx/sites-available/default
+    links:
+      - mysql
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:5.7
+    container_name: queue-database
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: "queues"
+      MYSQL_USER: "queues"
+      MYSQL_PASSWORD: "secret"
+      MYSQL_ROOT_PASSWORD: "secret"
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    name: queue_network
+    driver: bridge
